@@ -83,7 +83,7 @@ pipeline{
                             git config user.name jenkins
                             git config user.email jenkins@jenkins.com  
                             git add jokes-manifest.yaml
-                            git commit -m "jenkins: build $BUILD_NUMBER of job $JOB_NUMBER  see $JOB_DISPLAY_URL"
+                            git commit -m "jenkins: build $BUILD_NUMBER of job $JOB_NAME  see $JOB_DISPLAY_URL"
                             git push
                         """
                     }
