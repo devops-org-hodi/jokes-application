@@ -39,7 +39,7 @@ pipeline{
             parallel{
                 stage("sanity test"){
                     steps{
-                        dir("$TEST_REPO/sanity-test") {
+                        dir("$TEST_DIR/sanity-test") {
                             sh "chmod 777 test.sh"
                             sh "./test.sh"
                         }           
@@ -47,7 +47,7 @@ pipeline{
                 }
                 stage("test2 test"){
                     steps{
-                        dir("$TEST_REPO/sanity-test") {
+                        dir("$TEST_DIR/sanity-test") {
                             sh "chmod 777 test.sh"
                             sh "./test.sh"
                         }           
