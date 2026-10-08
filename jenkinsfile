@@ -5,8 +5,8 @@ pipeline{
         DOCKER_IMAGE="hothaifaz11/jokes-api:v$BUILD_NUMBER"
         CONTAINER_NAME="$JOB_NAME"
         // APPLCIATION_PORT
-        // TEST_REPO
-        // TEST_DIR
+        TEST_REPO="https://github.com/devops-org-hodi/jokes-test"
+        TEST_DIR="jokes-test"
         // DEPLOYMENT_REPO
         // DEPLOYMNET_DIR
 
@@ -27,11 +27,32 @@ pipeline{
         }
         stage("prepare for testing"){
             steps{
-                sh """docker run \
+                sh """docker run -d \
                       --name $CONTAINER_NAME \
                       -p 5000:5000 \
                       $DOCKER_IMAGE
                       """
+                sh "git clone $TEST_REPO"
+            }
+        }
+        stage("test"){
+            parallel{
+                stage("sanity test"){
+                    steps{
+                        dir("$TEST_REPO/sanity-test") {
+                            sh "chmod 777 test.sh"
+                            sh "./test.sh"
+                        }           
+                    }
+                }
+                stage("test2 test"){
+                    steps{
+                        dir("$TEST_REPO/sanity-test") {
+                            sh "chmod 777 test.sh"
+                            sh "./test.sh"
+                        }           
+                    }
+                }   
             }
         }
     }
