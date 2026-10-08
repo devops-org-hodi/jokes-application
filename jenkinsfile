@@ -71,7 +71,7 @@ pipeline{
             }
         }
         stage("update manifests"){
-            steps
+            steps{
                 withCredentials([usernamePassword
                 (credentialsId: 'github-cred',
                 passwordVariable: 'PASS',
