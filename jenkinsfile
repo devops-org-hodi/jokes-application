@@ -3,7 +3,7 @@ pipeline{
     environment{
         DOCKER_REPO="hothaifaz11/jokes-api"
         DOCKER_IMAGE="hothaifaz11/jokes-api:v$BUILD_NUMBER"
-        CONTAINER_NAME="shawarma-pita-with-tahini"
+        CONTAINER_NAME="$JOB_NAME"
         // APPLCIATION_PORT
         // TEST_REPO
         // TEST_DIR
@@ -25,10 +25,21 @@ pipeline{
             }
            
         }
+        stage("prepare for testing"){
+            steps{
+                sh """docker run \
+                      --name $CONTAINER_NAME \
+                      -p 5000:5000 \
+                      $DOCKER_IMAGE
+                      """
+            }
+        }
     }
     post{
         always{
+            sh "docker rm -f $CONTAINER_NAME"
             cleanWs()
+            sh "docker rmi $DOCKER_IMAGE"
         }
         success{
             echo "========pipeline executed successfully ========"
