@@ -20,8 +20,7 @@ pipeline{
                   usernameVariable: 'USERNAME')]) {
                     sh """ echo $PASS | docker login -u $USERNAME --password-stdin """
                     echo "======= building docker image ========"
-                    sh "docker buildx create --use --driver docker-container"
-                    sh "docker buildx inspect --bootstrap"
+                    sh "docker buildx create --name multiarch --use --bootstrap "
                     sh "docker buildx build --platform linux/arm64,linux/amd64 -t $DOCKER_IMAGE --push ."
                   }
            }
