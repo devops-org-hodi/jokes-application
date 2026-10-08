@@ -76,7 +76,7 @@ pipeline{
                 (credentialsId: 'github-cred',
                 passwordVariable: 'PASS',
                 usernameVariable: 'USER')]) {
-                    sh "git clone https://$USER:$PASS@https://github.com/devops-org-hodi/jokes-deployment.git "
+                    sh "git clone https://$USER:$PASS@github.com:devops-org-hodi/jokes-deployment.git "
                     dir("$DEPLOYMNET_DIR/kubernetes"){
                         sh """ 
                             sed -i 's|image:.*|image: $DOCKER_IMAGE|g' jokes-manifest.yaml
