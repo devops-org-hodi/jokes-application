@@ -1,16 +1,34 @@
 pipeline{
     agent any
+    environment{
+        DOCKER_REPO="hothaifaz11/jokes-api"
+        DOCKER_IMAGE="hothaifaz11/jokes-api:v$BUILD_NUMBER"
+        CONTAINER_NAME="shawarma-pita-with-tahini"
+        // APPLCIATION_PORT
+        // TEST_REPO
+        // TEST_DIR
+        // DEPLOYMENT_REPO
+        // DEPLOYMNET_DIR
+
+    }
     stages{
-        stage("A"){
-            steps{
-                echo "========executing A========"
+        stage("Build"){
+           steps{
+                echo "======= building docker image ========"
+                sh "docker build -t $DOCKER_IMAGE ."
+            }
+            post{
+                success{
+                    echo "------- verfy image tag ----------"
+                    sh "docker image ls | grep -i $DOCKER_REPO"
+                }
             }
            
         }
     }
     post{
         always{
-            echo "========always========"
+            cleanWs()
         }
         success{
             echo "========pipeline executed successfully ========"
