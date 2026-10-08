@@ -7,8 +7,8 @@ pipeline{
         // APPLCIATION_PORT
         TEST_REPO="https://github.com/devops-org-hodi/jokes-test"
         TEST_DIR="jokes-test"
-        // DEPLOYMENT_REPO
-        // DEPLOYMNET_DIR
+        DEPLOYMENT_REPO="https://github.com/devops-org-hodi/jokes-deployment"
+        DEPLOYMNET_DIR="jokes-deployment"
 
     }
     stages{
@@ -69,6 +69,26 @@ pipeline{
                     sh "docker push $DOCKER_IMAGE "
                 }
             }
+        }
+        stage("update manifests"){
+            steps
+                withCredentials([usernamePassword
+                (credentialsId: 'github-cred',
+                passwordVariable: 'PASS',
+                usernameVariable: 'USER')]) {
+                    sh "git clone https://$USER:$PASS@https://github.com/devops-org-hodi/jokes-deployment.git "
+                    dir("$DEPLOYMNET_DIR/kubernetes"){
+                        sh """ 
+                            sed -i 's|image:.*|image: $DOCKER_IMAGE|g' jokes-manifest.yaml
+                            git config user.name jenkins
+                            git config user.email jenkins@jenkins.com  
+                            git add jokes-manifest.yaml
+                            git commit -m "jenkins: build $BUILD_NUMBER of job $JOB_NUMBER  see $JOB_DISPLAY_URL"
+                            git push
+                        """
+                    }
+                }
+          }
         }
     }
     post{
