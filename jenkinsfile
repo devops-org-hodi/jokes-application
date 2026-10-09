@@ -58,34 +58,26 @@ pipeline{
                 }   
             }
         }
-        stage("push to docker hub"){
+        stage("update manifests"){
             steps{
-                
-                    sh "echo $PASS | docker login -u $USERNAME --password-stdin "
-                    sh "docker push $DOCKER_IMAGE "
+                withCredentials([usernamePassword
+                (credentialsId: 'joke-cred',
+                passwordVariable: 'PASS',
+                usernameVariable: 'USER')]) {
+                    sh "git clone https://$USER:$PASS@github.com/devops-org-hodi/jokes-deployment "
+                    dir("$DEPLOYMNET_DIR/kubernetes"){
+                        sh """ 
+                            sed -i 's|image:.*|image: $DOCKER_IMAGE|g' jokes-manifest.yaml
+                            git config user.name jenkins
+                            git config user.email jenkins@jenkins.com  
+                            git add jokes-manifest.yaml
+                            git commit -m "jenkins: build $BUILD_NUMBER of job $JOB_NAME  see $JOB_DISPLAY_URL"
+                            git push
+                        """
+                    }
                 }
-            }
+          }
         }
-        // stage("update manifests"){
-        //     steps{
-        //         withCredentials([usernamePassword
-        //         (credentialsId: 'joke-cred',
-        //         passwordVariable: 'PASS',
-        //         usernameVariable: 'USER')]) {
-        //             sh "git clone https://$USER:$PASS@github.com/devops-org-hodi/jokes-deployment "
-        //             dir("$DEPLOYMNET_DIR/kubernetes"){
-        //                 sh """ 
-        //                     sed -i 's|image:.*|image: $DOCKER_IMAGE|g' jokes-manifest.yaml
-        //                     git config user.name jenkins
-        //                     git config user.email jenkins@jenkins.com  
-        //                     git add jokes-manifest.yaml
-        //                     git commit -m "jenkins: build $BUILD_NUMBER of job $JOB_NAME  see $JOB_DISPLAY_URL"
-        //                     git push
-        //                 """
-        //             }
-        //         }
-        //   }
-        // }
     }
     post{
         always{
