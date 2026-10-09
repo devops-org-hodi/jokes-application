@@ -4,7 +4,6 @@ pipeline{
         DOCKER_REPO="hothaifaz11/jokes-api"
         DOCKER_IMAGE="hothaifaz11/jokes-api:v$BUILD_NUMBER"
         CONTAINER_NAME="$JOB_NAME"
-        // APPLCIATION_PORT
         TEST_REPO="https://github.com/devops-org-hodi/jokes-test"
         TEST_DIR="jokes-test"
         DEPLOYMENT_REPO="https://github.com/devops-org-hodi/jokes-deployment"
@@ -12,27 +11,33 @@ pipeline{
 
     }
     stages{
-        stage("Build"){
-           steps{
-                withCredentials([usernamePassword
-                (credentialsId: 'docker-creds',
-                 passwordVariable: 'PASS',
-                  usernameVariable: 'USERNAME')]) {
-                    sh """ echo $PASS | docker login -u $USERNAME --password-stdin """
-                    echo "======= building docker image ========"
-                    sh "docker buildx create --name multiarch --use --bootstrap "
-                    sh "docker buildx build --platform linux/arm64,linux/amd64 -t $DOCKER_IMAGE --push ."
-                  }
-           }
-            post{
-                success{
-                    sh "docker pull $DOCKER_IMAGE"
-                    echo "------- verfy image tag ----------"
-                    sh "docker image ls | grep -i $DOCKER_REPO"
-                }
+        stage("build"){
+            steps{
+                sh "docker build -t $DOCKER_IMAGE ."
+                sh "docker images | grep -i $DOCKER_REPO"
             }
-           
         }
+        // stage("Build"){
+        //    steps{
+        //         withCredentials([usernamePassword
+        //         (credentialsId: 'docker-creds',
+        //          passwordVariable: 'PASS',
+        //           usernameVariable: 'USERNAME')]) {
+        //             sh """ echo $PASS | docker login -u $USERNAME --password-stdin """
+        //             echo "======= building docker image ========"
+        //             sh "docker buildx create --name multiarch --use --bootstrap "
+        //             sh "docker buildx build --platform linux/arm64,linux/amd64 -t $DOCKER_IMAGE --push ."
+        //           }
+        //    }
+        //     post{
+        //         success{
+        //             sh "docker pull $DOCKER_IMAGE"
+        //             echo "------- verfy image tag ----------"
+        //             sh "docker image ls | grep -i $DOCKER_REPO"
+        //         }
+        //     }
+           
+        // }
         stage("prepare for testing"){
             steps{
                 sh """docker run -d \
@@ -67,21 +72,21 @@ pipeline{
                 }   
             }
         }
-        // stage("push to docker hub"){
-        //     steps{
-        //         withCredentials([usernamePassword
-        //         (credentialsId: 'docker-creds',
-        //          passwordVariable: 'PASS',
-        //           usernameVariable: 'USERNAME')]) {
-        //             sh """ echo $PASS | docker login -u $USERNAME --password-stdin """
-        //             sh "docker push $DOCKER_IMAGE "
-        //         }
-        //     }
-        // }
+        stage("push to docker hub"){
+            steps{
+                withCredentials([usernamePassword
+                (credentialsId: 'docker-creds',
+                 passwordVariable: 'PASS',
+                usernameVariable: 'USERNAME')]) {
+                    sh "echo $PASS | docker login -u $USERNAME --password-stdin "
+                    sh "docker push $DOCKER_IMAGE "
+                }
+            }
+        }
         stage("update manifests"){
             steps{
                 withCredentials([usernamePassword
-                (credentialsId: 'github-cred',
+                (credentialsId: 'joke-cred',
                 passwordVariable: 'PASS',
                 usernameVariable: 'USER')]) {
                     sh "git clone https://$USER:$PASS@github.com/devops-org-hodi/jokes-deployment "
