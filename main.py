@@ -22,7 +22,7 @@ def get_joke():
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok its working"})
+    return jsonify({"status": "ok its     working"})
 
 
 if __name__ == "__main__":
